@@ -1,4 +1,1 @@
-machina
-=======
-
-Clojure Machina
+Copyright © 2012 Daniel Rashid
