@@ -48,7 +48,10 @@
        (let [data-val (first (:data current))
              next-seq (cons (assoc current :data (rest (:data current))) (rest arr-frag-seq))
              output-pair [(+ lidx gidx) data-val]]
-         (lazy-seq (cons output-pair (combined-seq-helper next-seq gidx (inc lidx)))))))))
+         (if (empty? (:data current)) ; If we still have elements left, keeps us from adding a bunch of (index, nil) if the length is an overestimate
+           (lazy-seq (combined-seq-helper (rest arr-frag-seq) (+ gidx (:length current)) 0))
+           (lazy-seq (cons output-pair (combined-seq-helper next-seq gidx (inc lidx))))))))))
+
 
 (defn combined-seq
   "Convert a sequence of ArrayFragments into a lazy sequence of

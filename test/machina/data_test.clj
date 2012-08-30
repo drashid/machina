@@ -22,3 +22,13 @@
     (is (=
          (take 1 (drop 1000000 (combined-seq [(dense-fragment (range) 100000000)])))
          [[1000000 1000000]]))))
+
+(deftest dense-fragment-length-lt-gt
+  (testing "If a length is explicitly given for a dense fragment, it will truncate to that length"
+    (is (=
+            (combined-seq [(dense-fragment (range) 3)])
+            [[0 0] [1 1] [2 2]])))
+  (testing "If a length is explicitly given for a dense fragment, it will stop when it has no more elements, not fill 0s "
+    (is (=
+            (combined-seq [(dense-fragment [0 1 2] 10)])
+            [[0 0] [1 1] [2 2]]))))
