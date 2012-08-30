@@ -10,6 +10,16 @@
      (assert (not (neg? length)))
      (ArrayFragment. array-data length :dense)))
 
+(defn dense?
+  "A dense vector is a sequential collection of items"
+  [frag]
+  (= :dense (:type frag)))
+
+(defn sparse?
+  "A sparse vector is a map from {int->item}"
+  [frag]
+  (= :sparse (:type frag)))
+
 (defn sparse-fragment
    [sparse-data length]
    (assert (map? sparse-data))
@@ -18,19 +28,27 @@
 
 (defn- get-index
   [array-frag index default]
-  (let [getter (if (= (:type array-frag) :sparse) get nth)]
+  (let [getter (if (sparse? array-frag) get nth)]
     (getter (:data array-frag) index default)))
 
 (defn- combined-seq-helper
   "Private helper which takes a global index as well as a local index into the current element."
   [arr-frag-seq gidx lidx]
   (let [current (first arr-frag-seq)]
-    (if (not (empty? arr-frag-seq))
-      (if (and current (<= (:length current) lidx))
-        (lazy-seq (combined-seq-helper (rest arr-frag-seq) (+ gidx (:length current)) 0))
-        (let [data-val (get-index current lidx 0)
-              output-pair [(+ lidx gidx) data-val]]
-          (lazy-seq (cons output-pair (combined-seq-helper arr-frag-seq gidx (inc lidx)))))))))
+    (if (and (not (empty? arr-frag-seq)) (not (nil? current)))
+      (cond
+       (<= (:length current) lidx)
+       (lazy-seq (combined-seq-helper (rest arr-frag-seq) (+ gidx (:length current)) 0))
+       (sparse? current)
+       (let [data-val (get (:data current) lidx 0)
+             output-pair [(+ lidx gidx) data-val]]
+         (lazy-seq (cons output-pair (combined-seq-helper arr-frag-seq gidx (inc lidx)))))
+       (dense? current)
+       (let [data-val (first (:data current))
+             next-seq (cons (assoc current :data (rest (:data current))) (rest arr-frag-seq))
+             output-pair [(+ lidx gidx) data-val]]
+         (lazy-seq (cons output-pair (combined-seq-helper next-seq gidx (inc lidx)))))))))
+
 
 (defn combined-seq
   "Convert a sequence of ArrayFragments into a lazy sequence of
