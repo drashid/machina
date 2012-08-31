@@ -35,7 +35,7 @@
        ; If we've reached the end of the current fragment, move on to the next one,
        ; incrementing the global index and reverting the local index to 0
        (<= (:length current) lidx)
-       (lazy-seq (combined-seq-helper (rest arr-frag-seq) (+ gidx (:length current)) 0))
+       (combined-seq-helper (rest arr-frag-seq) (+ gidx (:length current)) 0)
        ; If we're sparse, pull out our data value from the map or default to 0
        (sparse? current)
        (let [data-val (get (:data current) lidx 0)
@@ -49,7 +49,7 @@
              next-seq (cons (assoc current :data (rest (:data current))) (rest arr-frag-seq))
              output-pair [(+ lidx gidx) data-val]]
          (if (empty? (:data current)) ; If we still have elements left, keeps us from adding a bunch of (index, nil) if the length is an overestimate
-           (lazy-seq (combined-seq-helper (rest arr-frag-seq) (+ gidx (:length current)) 0))
+           (combined-seq-helper (rest arr-frag-seq) (+ gidx (:length current)) 0)
            (lazy-seq (cons output-pair (combined-seq-helper next-seq gidx (inc lidx))))))))))
 
 
