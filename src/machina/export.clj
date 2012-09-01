@@ -3,15 +3,25 @@
            [machina.attribute :as attr]
            [clojure.string :as str]))
 
+;;
+;; Class
+;;
+
 (defrecord ClassData [attr func])
+
 
 (defn class-data
   [class-values class-function]
   (ClassData. (attr/nominal "class" class-values) class-function))
 
-(def ^{:dynamic true} *arff-mode* :dense)
+(defn binary-class-data
+  [class-values class-function]
+  (assert (= 2 (count class-values)) "Binary classes must have two possible values")
+  (class-data class-values class-function))
 
-(def ^{:dynamic true} *parallel* true)
+;;
+;; IO Helper
+;;
 
 (defprotocol OutputStringWriter
   (write [this string]))
@@ -27,6 +37,10 @@
 ;;
 ;; WEKA
 ;;
+
+(def ^{:dynamic true} *arff-mode* :dense)
+
+(def ^{:dynamic true} *parallel* true)
 
 (defn- escape
   [obj]
@@ -89,3 +103,34 @@
                  :dense (weka-dense-line feature-vector class-value)
                  :sparse (weka-sparse-line feature-vector class-value))))))
          data-points)))))
+
+;;
+;; Svm Light
+;;
+
+(defn- svm-light-class
+  "Convert class label such as 'SPAM'/'HAM' to SVM-Light format of -1/1"
+  [class-attr cls-val]
+  (let [other (first (disj (:vals class-attr) cls-val))]
+    (compare cls-val other)))
+
+(defn- svm-light-line
+  [feature-vector class-lbl]
+  (str class-lbl
+       " "
+       ;; index is incremented by 1 as per svm-light format (indexes start at 1, 0 is an internal bias term)
+       (str/join " " (map #(format "%s:%s" (inc (first %)) (second %))
+                          (filter #(and (not= 0 (second %)) (number? (second %))) feature-vector)))
+       "\n"))
+
+(defn svm-light
+  [data-points feature-set binary-class-data writer]
+  (let [mapf (if *parallel* pmap map)]
+    (doall
+     (mapf
+      (fn [dp]
+        (let [feature-vector (fs/compute-item feature-set dp)
+              class-value (svm-light-class (:attr binary-class-data) ((:func binary-class-data) dp))]
+          (write writer (svm-light-line feature-vector class-value))
+          ))
+      data-points))))

@@ -24,9 +24,9 @@
   (fs/feature-set [my-feature my-feature-2]))
 
 (def my-data
-  ["data1" "data2" "data3"])
+  ["data1" "data2" "data1"])
 
-(def cls (export/class-data ["data1" "data2" "data3"] identity))
+(def cls (export/binary-class-data ["data1" "data2"] identity))
 
 (def my-str-writer (java.io.StringWriter.))
 (def wrapped-writer (export/sync-java-writer my-str-writer))
@@ -34,9 +34,15 @@
 (def my-str-writer2 (java.io.StringWriter.))
 (def wrapped-writer2 (export/sync-java-writer my-str-writer2))
 
+(def my-str-writer3 (java.io.StringWriter.))
+(def wrapped-writer3 (export/sync-java-writer my-str-writer3))
+
 (binding [export/*arff-mode* :sparse]
   (export/weka-arff my-data my-fs cls wrapped-writer2))
 (println (.toString my-str-writer2))
 
 (export/weka-arff my-data my-fs cls wrapped-writer)
 (println (.toString my-str-writer))
+
+(export/svm-light my-data my-fs cls wrapped-writer3)
+(println (.toString my-str-writer3))
