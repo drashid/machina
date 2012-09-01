@@ -74,12 +74,13 @@
      (let [mapf (if *parallel* pmap map)
            mode *arff-mode*]
        (doall
-        (mapf (fn [dp]
-                (let [feature-vector (fs/compute-item feature-set dp)
-                      class-value ((:func class-data) dp)]
-                  (write writer
-                         (str
-                          (case mode
-                            :dense (weka-dense-line feature-vector class-value)
-                            :sparse (weka-sparse-line feature-vector class-value))))))
-              data-points)))))
+        (mapf
+         (fn [dp]
+           (let [feature-vector (fs/compute-item feature-set dp)
+                 class-value ((:func class-data) dp)]
+             (write writer
+              (str
+               (case mode
+                 :dense (weka-dense-line feature-vector class-value)
+                 :sparse (weka-sparse-line feature-vector class-value))))))
+         data-points)))))
