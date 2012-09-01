@@ -109,11 +109,11 @@
   (compute-items [this items] (map (partial compute-item this) items))
   )
 
-(def ^{:dynamic true} *parallel-comp* true)
+(def ^{:dynamic true} *parallel* true)
 
 (defn- build-feature-set
   [features]
-  (let [mapf (if *parallel-comp* pmap map)]
+  (let [mapf (if *parallel* pmap map)]
     (FeatureSet.
      (fn [item]
        (mapf #(% item) (get-compute-functions features))))))
