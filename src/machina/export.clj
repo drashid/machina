@@ -15,11 +15,6 @@
   ([class-values class-function]
      (ClassData. (attr/nominal "class" class-values) class-function)))
 
-(defn binary-class-data
-  [class-values class-function]
-  (assert (= 2 (count class-values)) "Binary classes must have two possible values")
-  (class-data class-values class-function))
-
 ;;
 ;; IO Helper
 ;;
@@ -115,8 +110,10 @@
   (case (:type class-attr)
     ; Convert class label such as 'SPAM'/'HAM' to SVM-Light format of -1/1 -- TODO: 0?
     :nominal
-    (let [other (first (disj (:vals class-attr) cls-val))]
-      (compare cls-val other))
+    (do
+      (assert (= 2 (count (:vals class-attr))) "Must be binary class for svmlight unless used with numerical attribute for ranking")
+      (let [other (first (disj (:vals class-attr) cls-val))]
+          (compare cls-val other)))
     ; Let numerics go through as svm-light also works with ranking
     :numeric
     cls-val

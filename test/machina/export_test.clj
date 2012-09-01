@@ -26,7 +26,7 @@
 (def my-data
   ["data1" "data2" "data1"])
 
-(def cls (export/binary-class-data ["data1" "data2"] identity))
+(def cls (export/class-data ["data1" "data2"] identity))
 
 (def rankingCls (export/class-data (fn [dp] (Math/random))))
 
