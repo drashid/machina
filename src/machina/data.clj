@@ -52,11 +52,11 @@
            (combined-seq-helper (rest arr-frag-seq) (+ gidx (:length current)) 0)
            (lazy-seq (cons output-pair (combined-seq-helper next-seq gidx (inc lidx))))))))))
 
-
 (defn combined-seq
   "Convert a sequence of ArrayFragments into a lazy sequence of
    (index, value) pairs.  Optionally takes an offset index for the first element."
   ([arr-frag-seq]
-   (combined-seq-helper arr-frag-seq 0 0))
+     (combined-seq arr-frag-seq 0))
   ([arr-frag-seq offset]
-   (combined-seq-helper arr-frag-seq offset 0)))
+     (assert (seq? arr-frag-seq) "Input must be a sequence of ArrayFragments")
+     (combined-seq-helper arr-frag-seq offset 0)))
