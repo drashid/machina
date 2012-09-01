@@ -132,13 +132,18 @@
        "\n"))
 
 (defn svm-light
-  [data-points feature-set binary-class-data writer]
-  (let [mapf (if *parallel* pmap map)]
-    (doall
-     (mapf
-      (fn [dp]
-        (let [feature-vector (fs/compute-item feature-set dp)
-              class-value (svm-light-class (:attr binary-class-data) ((:func binary-class-data) dp))]
-          (write writer (svm-light-line feature-vector class-value))
-          ))
-      data-points))))
+  ([data-points feature-set writer]
+     (let [zero-class-data (class-data (fn [dp] 0))]
+       (svm-light data-points feature-set zero-class-data writer)))
+  ([data-points feature-set label-data writer]
+     (let [mapf (if *parallel* pmap map)]
+       (doall
+        (mapf
+         (fn [dp]
+           (let [feature-vector (fs/compute-item feature-set dp)
+                 class-value (svm-light-class
+                              (:attr label-data)
+                              ((:func label-data) dp))]
+             (write writer (svm-light-line feature-vector class-value))
+             ))
+         data-points)))))
