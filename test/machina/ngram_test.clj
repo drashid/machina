@@ -5,11 +5,20 @@
 
 (deftest basic-ngrams
   (testing "Basic ngrams"
+    (is (= (ngram/ngrams 1 "Test" ngram/whitespace-tokenizer)
+           [["Test"]]
+           ))
+
     (is (= (ngram/ngrams 1 "Test sentence" ngram/whitespace-tokenizer)
            [["Test"] ["sentence"]]
            ))
+
     (is (= (ngram/ngrams 2 "Test sentence" ngram/whitespace-tokenizer)
            [["<s>" "Test"] ["Test" "sentence"] ["sentence" "</s>"]]
+           ))
+
+    (is (= (ngram/ngrams 2 "Test" ngram/whitespace-tokenizer)
+           [["<s>" "Test"] ["Test" "</s>"]]
            ))
 
     (is (= (first (ngram/ngrams 3 "Test sentence" ngram/whitespace-tokenizer))
