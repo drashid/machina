@@ -24,7 +24,15 @@
   [features]
   (map :compute features))
 
-(defrecord FeatureSet [compute])
+(defprotocol DatapointProcessor
+  (compute-item [this item])
+  (compute-items [this items]))
+
+(defrecord FeatureSet [compute]
+  DatapointProcessor
+  (compute-item [this item] (data/combined-seq ((:compute this) item)))
+  (compute-items [this items] (map (partial compute-item this) items))
+  )
 
 (def ^{:dynamic true} *parallel-comp* true)
 

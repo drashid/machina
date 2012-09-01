@@ -32,7 +32,7 @@
 (deftest use-feature-set
   (testing "Using feature set"
     (is (=
-         (map second (data/combined-seq ((:compute my-fs) "item")))
+         (map second (fs/compute-item my-fs "item"))
          [1 2 3 0 "a" 0]
          ))
     ))
