@@ -28,10 +28,15 @@
 ;; WEKA
 ;;
 
+(defn- escape
+  [obj]
+  (if (string? obj)
+    (str "\"" obj "\"")
+    obj))
+
 (defn- format-set-vals
   [set-attr]
-  (let [quote #(str "\"" % "\"")]
-    (str/join "," (map quote (:vals set-attr)))))
+  (str/join "," (map escape (:vals set-attr))))
 
 (defn- weka-header
   [attribute]
@@ -48,18 +53,18 @@
   [feature-vector class-lbl]
   (let [feature-values (map second feature-vector)]
     (str
-     (str/join "," feature-values)
+     (str/join "," (map escape feature-values))
      ","
-     class-lbl
+     (escape class-lbl)
      "\n")))
 
 (defn- weka-sparse-line
   [feature-vector class-lbl]
   (str
    "{"
-   (str/join ", " (map #(format "%s %s" (first %) (second %)) (filter #(not= 0 (second %)) feature-vector)))
+   (str/join ", " (map #(format "%s %s" (first %) (escape (second %))) (filter #(not= 0 (second %)) feature-vector)))
    ", "
-   (format "%s %s" (count feature-vector) class-lbl)
+   (format "%s %s" (count feature-vector) (escape class-lbl))
    "}\n"))
 
 (defn weka-arff
