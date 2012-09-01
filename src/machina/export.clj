@@ -9,10 +9,11 @@
 
 (defrecord ClassData [attr func])
 
-
 (defn class-data
-  [class-values class-function]
-  (ClassData. (attr/nominal "class" class-values) class-function))
+  ([class-function]
+     (ClassData. (attr/numeric "class") class-function))
+  ([class-values class-function]
+     (ClassData. (attr/nominal "class" class-values) class-function)))
 
 (defn binary-class-data
   [class-values class-function]
@@ -108,11 +109,18 @@
 ;; Svm Light
 ;;
 
+
 (defn- svm-light-class
-  "Convert class label such as 'SPAM'/'HAM' to SVM-Light format of -1/1"
   [class-attr cls-val]
-  (let [other (first (disj (:vals class-attr) cls-val))]
-    (compare cls-val other)))
+  (case (:type class-attr)
+    ; Convert class label such as 'SPAM'/'HAM' to SVM-Light format of -1/1 -- TODO: 0?
+    :nominal
+    (let [other (first (disj (:vals class-attr) cls-val))]
+      (compare cls-val other))
+    ; Let numerics go through as svm-light also works with ranking
+    :numeric
+    cls-val
+    ))
 
 (defn- svm-light-line
   [feature-vector class-lbl]

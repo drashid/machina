@@ -28,6 +28,8 @@
 
 (def cls (export/binary-class-data ["data1" "data2"] identity))
 
+(def rankingCls (export/class-data (fn [dp] (Math/random))))
+
 (def my-str-writer (java.io.StringWriter.))
 (def wrapped-writer (export/sync-java-writer my-str-writer))
 
@@ -44,5 +46,5 @@
 (export/weka-arff my-data my-fs cls wrapped-writer)
 (println (.toString my-str-writer))
 
-(export/svm-light my-data my-fs cls wrapped-writer3)
+(export/svm-light my-data my-fs rankingCls wrapped-writer3)
 (println (.toString my-str-writer3))
