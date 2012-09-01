@@ -94,8 +94,7 @@
            (let [feature-vector (fs/compute-item feature-set dp)
                  class-value ((:func class-data) dp)]
              (write writer
-              (str
-               (case mode
+              (str (case mode
                  :dense (weka-dense-line feature-vector class-value)
                  :sparse (weka-sparse-line feature-vector class-value))))))
          data-points)))))
@@ -108,12 +107,15 @@
 (defn- svm-light-class
   [class-attr cls-val]
   (case (:type class-attr)
+
     ; Convert class label such as 'SPAM'/'HAM' to SVM-Light format of -1/1 -- TODO: 0?
     :nominal
     (do
-      (assert (= 2 (count (:vals class-attr))) "Must be binary class for svmlight unless used with numerical attribute for ranking")
+      (assert (= 2 (count (:vals class-attr)))
+              "Must be binary class for svmlight unless used with numerical attribute for ranking")
       (let [other (first (disj (:vals class-attr) cls-val))]
-          (compare cls-val other)))
+        (compare cls-val other)))
+
     ; Let numerics go through as svm-light also works with ranking
     :numeric
     cls-val
