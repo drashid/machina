@@ -40,4 +40,5 @@
   (let [fs (build-feature-set features)]
     (if (attributes? features)
       (let [attrs (attr/merge-attributes (get-attributes features))]
-        (assoc fs :attrs attrs)))))
+        (assoc fs :attrs attrs))
+      fs)))

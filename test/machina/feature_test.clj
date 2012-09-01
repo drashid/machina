@@ -28,3 +28,11 @@
          (map second (data/combined-seq [((:compute my-feature-2) "item")]))
          [0 "a" 0]))
     ))
+
+(deftest use-feature-set
+  (testing "Using feature set"
+    (is (=
+         (map second (data/combined-seq ((:compute my-fs) "item")))
+         [1 2 3 0 "a" 0]
+         ))
+    ))
