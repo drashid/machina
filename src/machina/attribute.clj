@@ -4,21 +4,21 @@
 
 (defn validate
   [attribute dp]
-  ((:validate attribute) dp))
+  ((case (:type attribute)
+      :numeric (fn [d] (number? d))
+      :nominal (fn [d] (contains? (:vals attribute) d))
+      :string  (fn [d] (string? d))) dp
+   ))
 
 (defn numeric
   [name]
-  (assoc (Attribute. name :numeric)
-    :validate (fn [dp] (number? dp))))
+  (Attribute. name :numeric))
 
 (defn nominal
   [name vals]
   (let [val-set (if (set? vals) vals (set vals))]
-    (assoc (Attribute. name :set)
-      :vals val-set
-      :validate (fn [dp] (contains? val-set dp)))))
+    (assoc (Attribute. name :nominal) :vals val-set)))
 
 (defn string
   [name]
-  (assoc (Attribute. name :string)
-    :validate (fn [dp] (string? dp))))
+  (Attribute. name :string))
