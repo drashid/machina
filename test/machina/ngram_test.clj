@@ -20,3 +20,12 @@
            ["sentence" "</s>" "</s>"]
            ))
     ))
+
+(deftest rebind-start-symbol-test
+  (testing "Rebinding of start/end symbols"
+    (is (=
+         (binding [ngram/*ngram-start* "START"
+                   ngram/*ngram-end* "END"]
+           (ngram/ngrams 2 "Test sentence" ngram/whitespace-tokenizer))
+         [["START" "Test"] ["Test" "sentence"] ["sentence" "END"]]))
+    ))

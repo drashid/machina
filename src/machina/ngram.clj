@@ -1,8 +1,8 @@
 (ns machina.ngram)
 
-(def ^{:dynamic true} *ngram-start-symbol* "<s>")
+(def ^{:dynamic true} *ngram-start* "<s>")
 
-(def ^{:dynamic true} *ngram-end-symbol* "</s>")
+(def ^{:dynamic true} *ngram-end* "</s>")
 
 (defn whitespace-tokenizer
   [text]
@@ -12,8 +12,11 @@
   ([n text tokenizer]
      (ngrams n (tokenizer text)))
   ([n tokenized]
-     (partition n 1
-       (lazy-cat
-        (repeat (dec n) *ngram-start-symbol*)
-        tokenized
-        (repeat (dec n) *ngram-end-symbol*)))))
+     ;; capture to avoid issues with thread-local bindings and laziness
+     (let [start *ngram-start*
+           end   *ngram-end*]
+       (partition n 1
+         (lazy-cat
+          (repeat (dec n) start)
+          tokenized
+          (repeat (dec n) end))))))
