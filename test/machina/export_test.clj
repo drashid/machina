@@ -7,7 +7,7 @@
 (def my-feature
   (fs/feature
    (fn [item]
-     (fs/dense-fragment [1 2 3]))
+     [1 2 3])
    :attrs [(attr/numeric "n1")
            (attr/numeric "n2")
            (attr/numeric "n3")]))

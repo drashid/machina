@@ -103,7 +103,6 @@
 ;; Svm Light
 ;;
 
-
 (defn- svm-light-class
   [class-attr cls-val]
   (case (:type class-attr)
@@ -123,12 +122,13 @@
 
 (defn- svm-light-line
   [feature-vector class-lbl]
-  (str class-lbl
-       " "
-       ;; index is incremented by 1 as per svm-light format (indexes start at 1, 0 is an internal bias term)
-       (str/join " " (map #(format "%s:%s" (inc (first %)) (second %))
-                          (filter #(and (not= 0 (second %)) (number? (second %))) feature-vector)))
-       "\n"))
+  (let [filter-non-numeric-and-zero (partial filter #(and (not= 0 (second %)) (number? (second %))))
+        ;; index is incremented by 1 as per svm-light format (indexes start at 1, 0 is an internal bias term)
+        format-index-and-value #(format "%s:%s" (inc (first %)) (second %))]
+    (str class-lbl
+         " "
+         (str/join " " (map format-index-and-value (filter-non-numeric-and-zero feature-vector)))
+         "\n")))
 
 (defn svm-light
   ([data-points feature-set writer]
