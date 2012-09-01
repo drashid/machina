@@ -20,3 +20,11 @@
     (is (attr/validate (attr/string "string") "string"))
     (is (not (attr/validate (attr/string "string") 1)))
     ))
+
+(deftest merge-attributes
+  (testing "Merging of attributes, success and failure due to naming collision"
+    (is (map :name (attr/merge-attributes [[(attr/numeric "1") (attr/numeric "2")] [(attr/numeric "3") (attr/numeric "4")]] ))
+        ["1" "2" "3" "4"])
+    (is (thrown? AssertionError
+                 (attr/merge-attributes [[(attr/numeric "1") (attr/numeric "1")] [(attr/numeric "1") (attr/numeric "1")]])))
+    ))

@@ -21,3 +21,20 @@
 (defn string
   [name]
   (Attribute. name :string))
+
+(defn- unique?
+  ([coll]
+     (unique? #{} coll))
+  ([seen coll]
+     (cond
+      (empty? coll) true
+      (contains? seen (first coll)) false
+      :else (unique? (conj seen (first coll)) (rest coll)))))
+
+(defn merge-attributes
+  [& attr-colls]
+  (let [validate-names #(assert (unique? (map :name %)) "Attribute names must be unique!")
+        all-attrs (flatten (into [] attr-colls))]
+    (do
+      (validate-names all-attrs)
+      all-attrs)))
