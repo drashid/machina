@@ -5,10 +5,9 @@
 (defn validate
   [attribute dp]
   ((case (:type attribute)
-      :numeric (fn [d] (number? d))
-      :nominal (fn [d] (contains? (:vals attribute) d))
-      :string  (fn [d] (string? d))) dp
-   ))
+      :numeric #(number? %)
+      :nominal #(contains? (:vals attribute) %)
+      :string  #(string? %)) dp ))
 
 (defn numeric
   [name]
