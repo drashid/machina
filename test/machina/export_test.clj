@@ -65,9 +65,12 @@
 (def csv-cls (export/class-data ["A" "B"] #(last %)))
 
 (def my-csv-data
-  (with-open [rdr (io/reader (io/resource "test.csv"))]
-    (let [data-points (csv/parse-csv rdr)
-          out (java.io.StringWriter.)]
-      (export/svm-light data-points my-csv-feature-set csv-cls out)
-      (println (.toString out))
-      )))
+  (binding [export/*parallel* true
+            fs/*parallel* true]
+    (with-open [rdr (io/reader (io/resource "1million-test.csv"))
+                wrt (io/writer "test.out")]
+      (let [data-points (csv/parse-csv rdr)
+            out (java.io.StringWriter.)]
+        (time (export/svm-light data-points my-csv-feature-set csv-cls wrt))
+                                        ;(println (.toString out))
+        ))))
