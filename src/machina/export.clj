@@ -30,7 +30,7 @@
 
 (defn- agent-write
   [writer string]
-  (send writer write string))
+  (send-off writer write string))
 
 (defn- agent-close
   [writer]
@@ -98,7 +98,7 @@
          (agent-write out "\n@data\n")
          (let [mapf (if *parallel* pmap map)
                mode *arff-mode*]
-           (doall
+           (dorun
             (mapf
              (fn [dp]
                (let [feature-vector (fs/compute-item feature-set dp)
@@ -149,7 +149,7 @@
      (let [mapf (if *parallel* pmap map)
            out (create-agent-writer writer)]
        (try
-         (doall
+         (dorun
           (mapf
            (fn [dp]
              (let [feature-vector (fs/compute-item feature-set dp)
