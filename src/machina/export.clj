@@ -19,16 +19,24 @@
 ;; IO Helper
 ;;
 
-(defprotocol OutputStringWriter
-  (write [this string]))
+(defn- create-agent-writer
+  [writer]
+  (agent writer))
 
-(defn sync-java-writer
-  [^java.io.Writer writer]
-  (reify
-    OutputStringWriter
-      (write [this string]
-        (locking writer
-          (.write writer string)))))
+(defn- write
+  [writer string]
+  (.write writer string)
+  writer)
+
+(defn- agent-write
+  [writer string]
+  (send writer write string))
+
+(defn- agent-close
+  [writer]
+  (send writer #(.close %)))
+
+;; Write generic exporter that simple calls callback functions for the given items.  Perhaps these can be rewritten to use that?
 
 ;;
 ;; WEKA
@@ -81,23 +89,26 @@
   ([data-points feature-set class-data writer]
      (weka-arff data-points feature-set class-data writer "default-relation"))
   ([data-points feature-set class-data writer relation-name]
-     (assert (:attrs feature-set) "Feature set attributes are required for WEKA export")
-     (write writer (str "@relation " relation-name "\n\n"))
-     (doall (map #(write writer (weka-header %)) (:attrs feature-set)))
-     (write writer (weka-header (:attr class-data)))
-     (write writer "\n@data\n")
-     (let [mapf (if *parallel* pmap map)
-           mode *arff-mode*]
-       (doall
-        (mapf
-         (fn [dp]
-           (let [feature-vector (fs/compute-item feature-set dp)
-                 class-value ((:func class-data) dp)]
-             (write writer
-              (str (case mode
-                 :dense (weka-dense-line feature-vector class-value)
-                 :sparse (weka-sparse-line feature-vector class-value))))))
-         data-points)))))
+     (let [out (create-agent-writer writer)]
+       (try
+         (assert (:attrs feature-set) "Feature set attributes are required for WEKA export")
+         (agent-write out (str "@relation " relation-name "\n\n"))
+         (doall (map #(write writer (weka-header %)) (:attrs feature-set)))
+         (agent-write out (weka-header (:attr class-data)))
+         (agent-write out "\n@data\n")
+         (let [mapf (if *parallel* pmap map)
+               mode *arff-mode*]
+           (doall
+            (mapf
+             (fn [dp]
+               (let [feature-vector (fs/compute-item feature-set dp)
+                     class-value ((:func class-data) dp)]
+                 (agent-write out
+                              (str (case mode
+                                     :dense (weka-dense-line feature-vector class-value)
+                                     :sparse (weka-sparse-line feature-vector class-value))))))
+             data-points)))
+         (finally (agent-close out))))))
 
 ;;
 ;; Svm Light
@@ -135,14 +146,17 @@
      (let [zero-class-data (class-data (fn [dp] 0))]
        (svm-light data-points feature-set zero-class-data writer)))
   ([data-points feature-set label-data writer]
-     (let [mapf (if *parallel* pmap map)]
-       (doall
-        (mapf
-         (fn [dp]
-           (let [feature-vector (fs/compute-item feature-set dp)
-                 class-value (svm-light-class
-                              (:attr label-data)
-                              ((:func label-data) dp))]
-             (write writer (svm-light-line feature-vector class-value))
-             ))
-         data-points)))))
+     (let [mapf (if *parallel* pmap map)
+           out (create-agent-writer writer)]
+       (try
+         (doall
+          (mapf
+           (fn [dp]
+             (let [feature-vector (fs/compute-item feature-set dp)
+                   class-value (svm-light-class
+                                (:attr label-data)
+                                ((:func label-data) dp))]
+               (agent-write out (svm-light-line feature-vector class-value))
+               ))
+           data-points))
+         (finally (agent-close out))))))

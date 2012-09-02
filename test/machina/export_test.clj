@@ -31,20 +31,17 @@
 (def ranking-cls (export/class-data (fn [dp] (Math/random))))
 
 (def my-str-writer (java.io.StringWriter.))
-(def wrapped-writer (export/sync-java-writer my-str-writer))
 
 (def my-str-writer2 (java.io.StringWriter.))
-(def wrapped-writer2 (export/sync-java-writer my-str-writer2))
 
 (def my-str-writer3 (java.io.StringWriter.))
-(def wrapped-writer3 (export/sync-java-writer my-str-writer3))
 
 (binding [export/*arff-mode* :sparse]
-  (export/weka-arff my-data my-fs binary-cls wrapped-writer2))
+  (export/weka-arff my-data my-fs binary-cls my-str-writer2))
 (println (.toString my-str-writer2))
 
-(export/weka-arff my-data my-fs binary-cls wrapped-writer)
+(export/weka-arff my-data my-fs binary-cls my-str-writer)
 (println (.toString my-str-writer))
 
-(export/svm-light my-data my-fs ranking-cls wrapped-writer3)
+(export/svm-light my-data my-fs ranking-cls my-str-writer3)
 (println (.toString my-str-writer3))
