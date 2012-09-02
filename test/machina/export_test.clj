@@ -1,7 +1,9 @@
 (ns machina.export-test
   (:require [machina.export :as export]
             [machina.attribute :as attr]
-            [machina.feature :as fs])
+            [machina.feature :as fs]
+            [clojure-csv.core :as csv]
+            [clojure.java.io :as io])
   (:use clojure.test))
 
 (def my-feature
@@ -45,3 +47,27 @@
 
 (export/svm-light my-data my-fs ranking-cls my-str-writer3)
 (println (.toString my-str-writer3))
+
+;;
+;; Example with features derived from CSV file data
+;; Where first N data points are numeric features, last one is class label
+;;
+
+(def my-csv-feature
+  (fs/feature
+   (fn [item]
+     (map #(Integer/parseInt %) (drop-last item)) ;all but class item
+     )))
+
+(def my-csv-feature-set
+  (fs/feature-set [my-csv-feature]))
+
+(def csv-cls (export/class-data ["A" "B"] #(last %)))
+
+(def my-csv-data
+  (with-open [rdr (io/reader (io/resource "test.csv"))]
+    (let [data-points (csv/parse-csv rdr)
+          out (java.io.StringWriter.)]
+      (export/svm-light data-points my-csv-feature-set csv-cls out)
+      (println (.toString out))
+      )))
