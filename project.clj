@@ -4,4 +4,5 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.4.0"]
-                 [clojure-csv "2.0.0-alpha2"]])
+                 [clojure-csv "2.0.0-alpha2"]]
+  :jvm-opts ["-Xmx1g" "-server"])
