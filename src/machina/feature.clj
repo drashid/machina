@@ -81,17 +81,9 @@
   [feature]
   (-> feature :meta :attrs))
 
-(defn- get-attributes
-  [features]
-  (map get-attribute features))
-
-(defn attributes?
+(defn- attributes?
   [features]
   (some #(not (nil? (get-attribute %))) features))
-
-(defn- get-compute-functions
-  [features]
-  (map :compute features))
 
 (defprotocol DatapointProcessor
   (compute-item [this item])
@@ -113,15 +105,16 @@
 
 (defn- build-feature-set
   [features]
-  (let [mapf (if *parallel* pmap map)]
+  (let [mapf (if *parallel* pmap map)
+        compute-funcs (map :compute features)]
     (FeatureSet.
      (fn [item]
-       (mapf #(% item) (get-compute-functions features))))))
+       (mapf #(% item) compute-funcs)))))
 
 (defn feature-set
   [features]
   (let [fs (build-feature-set features)]
     (if (attributes? features)
-      (let [attrs (attr/merge-attributes (get-attributes features))]
+      (let [attrs (attr/merge-attributes (map get-attribute features))]
         (assoc fs :attrs attrs))
       fs)))
