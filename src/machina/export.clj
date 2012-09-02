@@ -43,11 +43,11 @@
   (.write writer string)
   writer)
 
-(defn- write
+(defn- a-write
   [writer string]
   (send-off writer agent-write string))
 
-(defn- close
+(defn- a-close
   [writer]
   (send writer #(.close %)))
 
