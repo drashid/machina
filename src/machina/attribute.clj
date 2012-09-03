@@ -22,9 +22,10 @@
   [name]
   (Attribute. name :string))
 
+; class is a reserved feature name
 (defn- unique?
   ([coll]
-     (unique? #{} coll))
+     (unique? #{"class"} coll))
   ([seen coll]
      (cond
       (empty? coll) true

@@ -23,7 +23,7 @@
   (write [this string])
   (close [this]))
 
-(defn sync-java-writer
+(defn- sync-java-writer
   [^java.io.Writer writer]
   (reify
     OutputStringWriter
