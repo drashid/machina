@@ -22,15 +22,15 @@
   ([array-data]
      (dense-fragment array-data (count array-data)))
   ([array-data length]
-     (assert (sequential? array-data))
-     (assert (not (neg? length)))
+     {:pre [(sequential? array-data)
+            (not (neg? length))]}
      (ArrayFragment. array-data length :dense)))
 
 (defn sparse-fragment
-   [sparse-data length]
-   (assert (map? sparse-data))
-   (assert (not (neg? length)))
-   (ArrayFragment. sparse-data length :sparse))
+  [sparse-data length]
+  {:pre [(map? sparse-data)
+         (not (neg? length))]}
+  (ArrayFragment. sparse-data length :sparse))
 
 (defn- combined-seq-helper
   "Private helper which takes a global index as well as a local index into the current element."
@@ -64,7 +64,7 @@
   ([arr-frag-seq]
      (combined-seq arr-frag-seq 0))
   ([arr-frag-seq offset]
-     (assert (sequential? arr-frag-seq) "Input must be a sequence of ArrayFragments")
+     {:pre [(sequential? arr-frag-seq)]}
      (combined-seq-helper arr-frag-seq offset 0)))
 
 ;;
