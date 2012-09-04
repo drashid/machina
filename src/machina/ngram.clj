@@ -1,4 +1,5 @@
-(ns machina.ngram)
+(ns machina.ngram
+  (require [clojure.string :as string]))
 
 (def ^{:dynamic true} *ngram-start* "<s>")
 
@@ -6,7 +7,7 @@
 
 (defn whitespace-tokenizer
   [text]
-  (clojure.string/split text #"[\s]+"))
+  (string/split text #"[\s]+"))
 
 (defn ngrams
   ([n text tokenizer]
