@@ -7,13 +7,15 @@
 ;; Class
 ;;
 
+(def ^{:dynamic true} *class-name* "class")
+
 (defrecord ClassData [attr func])
 
 (defn class-data
   ([class-function]
-     (ClassData. (attr/numeric "class") class-function))
+     (ClassData. (attr/numeric *class-name*) class-function))
   ([class-values class-function]
-     (ClassData. (attr/nominal "class" class-values) class-function)))
+     (ClassData. (attr/nominal *class-name* class-values) class-function)))
 
 ;;
 ;; IO Helper

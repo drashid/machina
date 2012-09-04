@@ -64,10 +64,10 @@
 
 (def csv-cls (export/class-data ["A" "B"] #(last %)))
 
-(def my-csv-data
-  (binding [export/*parallel* true
-            fs/*parallel* false]
-    (with-open [rdr (io/reader (io/resource "1million-test.csv"))
-                wrt (io/writer "test.out")]
-      (let [data-points (csv/parse-csv rdr)]
-        (time (export/svm-light data-points my-csv-feature-set csv-cls wrt))))))
+;; (def my-csv-data
+;;   (binding [export/*parallel* true
+;;             fs/*parallel* false]
+;;     (with-open [rdr (io/reader (io/resource "1million-test.csv"))
+;;                 wrt (io/writer "test.out")]
+;;       (let [data-points (csv/parse-csv rdr)]
+;;         (time (export/svm-light data-points my-csv-feature-set csv-cls my-str-writer3))))))
