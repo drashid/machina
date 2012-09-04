@@ -104,9 +104,9 @@
   ([data-points feature-set class-data writer]
      (weka-arff data-points feature-set class-data writer "default-relation"))
   ([data-points feature-set class-data writer relation-name]
+     {:pre [(:attrs feature-set)]}
      (let [out (sync-java-writer writer)]
        (try
-         (assert (:attrs feature-set) "Feature set attributes are required for WEKA export")
          (write out (str "@relation " relation-name "\n\n"))
          (doall (map #(write out (weka-header %)) (:attrs feature-set)))
          (write out (weka-header (:attr class-data)))
@@ -129,22 +129,21 @@
 ;; Svm Light
 ;;
 
+(defn- svm-nominal-cls
+  [class-attr cls-val]
+  {:pre [(= 2 (count (:vals class-attr)))]}
+  (let [other (first (disj (:vals class-attr) cls-val))]
+    (compare cls-val other)))
+
+
 (defn- svm-light-class
   [class-attr cls-val]
   (case (:type class-attr)
-
     ; Convert class label such as 'SPAM'/'HAM' to SVM-Light format of -1/1 -- TODO: 0?
-    :nominal
-    (do
-      (assert (= 2 (count (:vals class-attr)))
-              "Must be binary class for svmlight unless used with numerical attribute for ranking")
-      (let [other (first (disj (:vals class-attr) cls-val))]
-        (compare cls-val other)))
+    :nominal (svm-nominal-cls class-attr cls-val)
 
     ; Let numerics go through as svm-light also works with ranking
-    :numeric
-    cls-val
-    ))
+    :numeric cls-val))
 
 (defn- svm-light-line
   [feature-vector class-lbl]

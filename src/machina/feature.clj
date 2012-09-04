@@ -98,8 +98,7 @@
 (defrecord FeatureSet [compute]
   DatapointProcessor
   (compute-item [this item] (combined-seq (map auto-wrap-dense ((:compute this) item))))
-  (compute-items [this items] (map (partial compute-item this) items))
-  )
+  (compute-items [this items] (map (partial compute-item this) items)))
 
 (def ^{:dynamic true} *parallel* true)
 
